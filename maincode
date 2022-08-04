@@ -1,0 +1,86 @@
+#importing all the required packages
+
+import nltk
+import re
+import gensim
+import csv
+import nltk.tokenize
+import pandas as pd
+nltk.download('punkt', quiet=True)
+from sklearn.manifold import TSNE
+import numpy as np
+from nltk.corpus import stopwords 
+import string
+
+#Reading the CSV file using pandas dataframe
+df = pd.read_csv('C:/Users/HP/OneDrive/Documents/AI/Clothing_Reviews.csv')
+
+#Printing the head of the dataframe for a dataframe preview 
+df.head(10)
+
+#Selecting only the required column that has text data for the processing
+df['Review Text'] = df['Review Text'].str.lower()
+
+#Coverting all the text present in headlines column to lower case
+df['Review Text'] =  df['Review Text'].str.lower().values
+
+#Removing the stop words to focus on important words
+def remove_stopwords(Review Text):
+    """custom function to remove the stopwords"""
+    STOPWORDS = set(stopwords.words('english'))
+    return " ".join([word for word in str(Review Text).split() if word not in STOPWORDS])
+
+df['Review Text'] = df['Review Text'].apply(lambda headline: remove_stopwords(Review Text))
+
+#Removing the punctuations to get better results
+PUNCT_TO_REMOVE = string.punctuation
+def remove_punctuation(Review Text):
+    """custom function to remove the punctuation"""
+    return headline.translate(str.maketrans('', '', PUNCT_TO_REMOVE))
+
+Reviews= df['Review Text'].apply(lambda Reviews: remove_punctuation(headline))
+Reviews
+
+#Tokeniziing the text present to get the base words 
+headline = [nltk.word_tokenize(review) for review in headline]
+
+
+headline
+
+
+#Developing the model using gensim
+review_model = gensim.models.Word2Vec(headline, min_count=1)
+
+#Finding the similarity for the word up in the entire vector space
+review_model.wv.most_similar('up')
+
+#Finding the similarity for the word down in the entire vector space
+review_model.wv.most_similar('down')
+
+#Finding the similarity for the word by defining a array of similar contextual words
+adjectives = ['up', 'rise', 'tops', 'report','nifty','jumps','dollar','billion','surge','bull','stock','hike','closes', 'lead', 'rebound', 'settle', 'buzzing', 'positive', 'pops', 'profit', 'big', 'returns', 'gain', 'growth', 'shine']
+
+
+for a in adjectives:
+    print('up', a, review_model.wv.similarity('up', a))
+
+#Finding the similarity for the word by defining a array of similar contextual words
+adjectives = ['hit', 'low', 'bottom', 'down','closes','slide','drop','fall','cost','loss','risk','pullback','slip']
+
+
+dict_a = []
+for a in adjectives:
+    sim = review_model.wv.similarity('down', a)
+    dict_a.append((a,sim))
+print(dict_a)    
+
+
+for a in adjectives:
+    print('low', a, review_model.wv.similarity('low', a))
+
+# Generating the bin file for the model developed.
+review_model2 = gensim.models.Word2Vec(headline, min_count=1)
+
+review_model2.wv.save_word2vec_format('review_model4.bin')
+    
+
